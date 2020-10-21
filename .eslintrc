@@ -1,0 +1,10 @@
+{
+    "env": {
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+    "parser": "@babel/eslint-parser",
+    "extends": ["plugin:prettier/recommended"]
+}
