@@ -102,7 +102,7 @@ describe('Soft Delete plugin tests', () => {
 
                 const user = await User.query().findById(createdUser.id);
                 console.log(user);
-                expect(user.deletedAt).toBeString();
+                expect(user.deleted2).toBeString();
             });
         });
         // describe('when used with .$query()', () => {
