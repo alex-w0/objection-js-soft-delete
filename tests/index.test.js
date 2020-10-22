@@ -25,86 +25,154 @@ afterAll(async () => {
 });
 
 describe('Soft Delete plugin tests', () => {
-    // beforeEach(() => {
-    //     return User.query().insertGraph({
-    //         username: faker.internet.userName(),
-    //         contact: [
-    //             {
-    //                 firstName: faker.name.firstName(),
-    //                 lastName: faker.name.lastName(),
-    //             },
-    //         ],
-    //     });
-    // });
+    const startDate = new Date();
 
-    // afterEach(() => {
-    //     return knexConnection('JoinTable')
-    //         .delete()
-    //         .then(() => {
-    //             return knexConnection('user').delete();
-    //         })
-    //         .then(() => {
-    //             return knexConnection('RelatedObjects').delete();
-    //         });
-    // });
+    afterEach(async () => {
+        const { User } = getModel();
+
+        await User.query().hardDelete();
+    });
 
     describe('.deleteById()', () => {
-        test('should only soft delete the record', async () => {
+        test('when nothing is specified', async () => {
             const { User } = getModel();
 
-            const createdUser = await User.query().insertAndFetch({
+            const {
+                id,
+                deletedAt: deletedAtCreate,
+            } = await User.query().insertAndFetch({
                 username: faker.internet.userName(),
             });
 
-            await User.query().deleteById(1);
-            const user = await User.query().findById(createdUser.id);
+            expect(deletedAtCreate).toBeNull();
 
-            expect(user.deletedAt).toBeString();
+            await User.query().deleteById(id);
+
+            const { deletedAt } = await User.query().findById(id);
+
+            expect(deletedAt).toBeString();
+        });
+
+        it('when a columnName was specified', async () => {
+            const { User } = getModel({
+                columnName: 'deletedDate',
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().deleteById(id);
+
+            const user = await User.query().findById(id);
+
+            expect(user.deletedDate).toBeString();
+        });
+
+        it('when a columnName and a deletedValue was specified', async () => {
+            const { User } = getModel({
+                columnName: 'active',
+                deletedValue: false,
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().deleteById(id);
+
+            const user = await User.query().findById(id);
+            expect(user.active).toBe(0);
+        });
+
+        it('when a deletedValue and a notDeletedValue was specified', async () => {
+            const { User } = getModel({
+                deletedValue: null,
+                notDeletedValue: new Date(),
+            });
+
+            const createdUser = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+                // Reverse the behaviour
+                deletedAt: new Date(),
+            });
+
+            expect(createdUser.deletedAt).toBeString();
+
+            await User.query().deleteById(createdUser.id);
+
+            const user = await User.query().findById(createdUser.id);
+            expect(user.deletedAt).toBeNull();
         });
     });
 
     describe('.delete() or .del()', () => {
-        test('should only soft delete the record', async () => {
+        test('when nothing is specified', async () => {
             const { User } = getModel();
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().where('id', id).delete();
+
+            const user = await User.query().findById(id);
+
+            expect(user.deletedAt).toBeString();
+        });
+
+        it('when a columnName was specified', async () => {
+            const { User } = getModel({
+                columnName: 'deletedDate',
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().where('id', id).delete();
+
+            const user = await User.query().findById(id);
+
+            expect(user.deletedDate).toBeString();
+        });
+
+        it('when a columnName and a deletedValue was specified', async () => {
+            const { User } = getModel({
+                columnName: 'active',
+                deletedValue: false,
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().where('id', id).delete();
+
+            const user = await User.query().findById(id);
+            expect(user.active).toBe(0);
+        });
+
+        it('when a deletedValue and notDeletedValue was specified', async () => {
+            const { User } = getModel({
+                deletedValue: null,
+                notDeletedValue: new Date(),
+            });
 
             const createdUser = await User.query().insertAndFetch({
                 username: faker.internet.userName(),
+                // Reverse the behaviour
+                deletedAt: new Date(),
             });
+
+            expect(createdUser.deletedAt).toBeString();
 
             await User.query().where('id', createdUser.id).delete();
 
             const user = await User.query().findById(createdUser.id);
-
-            expect(user.deletedAt).toBeString();
+            expect(user.deletedAt).toBeNull();
         });
-        // describe('when a columnName was not specified', () => {
-        //   it('should set the "deleted" column to true for any matching records', () => {
-        //     const TestObject = getModel();
-        //     return TestObject.query(knex)
-        //       .where('id', 1)
-        //       .del()
-        //       .then(() => {
-        //         return TestObject.query(knex).where('id', 1).first();
-        //       })
-        //       .then((result) => {
-        //         expect(result.deleted).to.equal(1, 'row not marked deleted');
-        //       });
-        //   });
-        // });
-        describe('when a columnName was specified', () => {
-            it('should set that columnName to true for any matching records', async () => {
-                const { User } = getModel({ columnName: 'deleted2' });
-                const createdUser = await User.query().insertAndFetch({
-                    username: faker.internet.userName(),
-                });
 
-                await User.query().where('id', createdUser.id).delete();
-
-                const user = await User.query().findById(createdUser.id);
-                console.log(user);
-                expect(user.deleted2).toBeString();
-            });
-        });
         // describe('when used with .$query()', () => {
         //   it('should still mark the row deleted', () => {
         //     // not sure if this will work...

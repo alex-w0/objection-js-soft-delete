@@ -5,17 +5,22 @@ function up() {
         .createTable('user', (table) => {
             table.increments('id').primary();
             table.string('username');
-            table.timestamp('deleted2').defaultTo(null);
+            table.boolean('active').defaultTo(true);
+            table.timestamp('deleted_date').defaultTo(null);
             table.timestamp('deleted_at').defaultTo(null);
         })
         .createTable('contact', (table) => {
             table.increments('id').primary();
             table.string('first_name');
             table.string('last_name');
+            table.boolean('active').defaultTo(true);
+            table.timestamp('deleted_date').defaultTo(null);
             table.timestamp('deleted_at').defaultTo(null);
         })
         .createTable('user_contact', (table) => {
             table.increments('id').primary();
+            table.boolean('active').defaultTo(true);
+            table.timestamp('deleted_date').defaultTo(null);
             table.timestamp('deleted_at').defaultTo(null);
 
             table.integer('user_id').unsigned().notNullable();
