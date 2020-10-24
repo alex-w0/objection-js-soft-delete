@@ -279,7 +279,7 @@ describe('Soft Delete plugin tests', () => {
         });
     });
 
-    describe.only('.whereNotDeleted()', () => {
+    describe('.whereNotDeleted()', () => {
         function whereNotDeletedRelationshipTest(TestObject) {
             // define the relationship to the TestObjects table
             const RelatedObject = class RelatedObject extends Model {
@@ -359,7 +359,7 @@ describe('Soft Delete plugin tests', () => {
             const deletedRows = rows.filter((m) => m.deletedAt !== null);
 
             expect(rows.length).toBe(2);
-            expect(deletedRows.length).toBe(0);
+            expect(deletedRows.length).toBe(1);
         });
 
         it('should return only the non deleted records when a different columnName is specified', async () => {
