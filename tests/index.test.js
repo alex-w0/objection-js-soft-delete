@@ -174,7 +174,7 @@ describe('Soft Delete plugin tests', () => {
         });
     });
 
-      describe('.hardDelete()', () => {
+    describe('.hardDelete()', () => {
         it('should delete the row from the database when nothing is specified', async () => {
             const { User } = getModel();
 
@@ -227,20 +227,18 @@ describe('Soft Delete plugin tests', () => {
             const deletedRecord = await User.query().findById(id);
             expect(deletedRecord).toBeUndefined();
         });
-      });
+    });
 
-      describe('.undelete()', () => {
+    describe('.undelete()', () => {
         it('should undelete the row from the database when nothing is specified', async () => {
             const { User } = getModel();
 
             const { id } = await User.query().insertAndFetch({
                 username: faker.internet.userName(),
-                deletedAt: new Date()
+                deletedAt: new Date(),
             });
 
-            await User.query()
-                .where('id', id)
-                .undelete();
+            await User.query().where('id', id).undelete();
 
             const user = await User.query().findById(id);
             expect(user.deletedAt).toBeNull();
@@ -248,7 +246,7 @@ describe('Soft Delete plugin tests', () => {
 
         it('should undelete the row when a columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate'
+                columnName: 'deletedDate',
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -276,65 +274,65 @@ describe('Soft Delete plugin tests', () => {
             await User.query().where('id', id).undelete();
 
             const user = await User.query().findById(id);
-            console.log(user)
+            console.log(user);
             expect(user.active).toBe(true);
         });
-      });
+    });
 
-      describe.only('.whereNotDeleted()', () => {
+    describe.only('.whereNotDeleted()', () => {
         function whereNotDeletedRelationshipTest(TestObject) {
-          // define the relationship to the TestObjects table
-          const RelatedObject = class RelatedObject extends Model {
-            static get tableName() {
-              return 'RelatedObjects';
-            }
+            // define the relationship to the TestObjects table
+            const RelatedObject = class RelatedObject extends Model {
+                static get tableName() {
+                    return 'RelatedObjects';
+                }
 
-            static get relationMappings() {
-              return {
-                testObjects: {
-                  relation: Model.ManyToManyRelation,
-                  modelClass: TestObject,
-                  join: {
-                    from: 'RelatedObjects.id',
-                    through: {
-                      from: 'JoinTable.relatedObjectId',
-                      to: 'JoinTable.testObjectId',
-                    },
-                    to: 'TestObjects.id',
-                  },
-                  filter: (f) => {
-                    f.whereNotDeleted();
-                  },
-                },
-              };
-            }
-          };
+                static get relationMappings() {
+                    return {
+                        testObjects: {
+                            relation: Model.ManyToManyRelation,
+                            modelClass: TestObject,
+                            join: {
+                                from: 'RelatedObjects.id',
+                                through: {
+                                    from: 'JoinTable.relatedObjectId',
+                                    to: 'JoinTable.testObjectId',
+                                },
+                                to: 'TestObjects.id',
+                            },
+                            filter: (f) => {
+                                f.whereNotDeleted();
+                            },
+                        },
+                    };
+                }
+            };
 
-          return (
-            TestObject.query(knex)
-              .where('id', 1)
-              // soft delete one test object
-              .del()
-              .then(() => {
-                return (
-                  RelatedObject.query(knex)
+            return (
+                TestObject.query(knex)
                     .where('id', 1)
-                    // use the predefined filter
-                    .eager('testObjects')
-                    .first()
-                );
-              })
-              .then((result) => {
-                expect(result.testObjects.length).to.equal(
-                  1,
-                  'eager returns not filtered properly'
-                );
-                expect(result.testObjects[0].id).to.equal(
-                  2,
-                  'wrong result returned'
-                );
-              })
-          );
+                    // soft delete one test object
+                    .del()
+                    .then(() => {
+                        return (
+                            RelatedObject.query(knex)
+                                .where('id', 1)
+                                // use the predefined filter
+                                .eager('testObjects')
+                                .first()
+                        );
+                    })
+                    .then((result) => {
+                        expect(result.testObjects.length).to.equal(
+                            1,
+                            'eager returns not filtered properly'
+                        );
+                        expect(result.testObjects[0].id).to.equal(
+                            2,
+                            'wrong result returned'
+                        );
+                    })
+            );
         }
 
         it('should return only the non deleted records', async () => {
@@ -346,15 +344,15 @@ describe('Soft Delete plugin tests', () => {
                 },
                 {
                     username: faker.internet.userName(),
-                    deletedAt: new Date()
-                },
-                {
-                    username: faker.internet.userName()
+                    deletedAt: new Date(),
                 },
                 {
                     username: faker.internet.userName(),
-                    deletedAt: new Date()
-                }
+                },
+                {
+                    username: faker.internet.userName(),
+                    deletedAt: new Date(),
+                },
             ]);
 
             const rows = await User.query().whereNotDeleted();
@@ -479,7 +477,7 @@ describe('Soft Delete plugin tests', () => {
         //     return whereNotDeletedRelationshipTest(TestObject);
         //   });
         // });
-      });
+    });
 
     //   describe('.whereDeleted()', () => {
     //     function whereDeletedRelationhipTest(TestObject) {
