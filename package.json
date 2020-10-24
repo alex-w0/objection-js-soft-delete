@@ -30,7 +30,7 @@
         "clean": "rm -rf dist"
     },
     "hooks": {
-        "pre-commit": "lint-staged && yarn run test"
+        "pre-commit": "yarn run test"
     },
     "lint-staged": {
         "*": "yarn run test"
