@@ -29,4 +29,12 @@
         "test": "jest",
         "clean": "rm -rf dist"
     },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged && yarn run test"
+        }
+    },
+    "lint-staged": {
+        "*": "yarn run test"
+    }
 }
