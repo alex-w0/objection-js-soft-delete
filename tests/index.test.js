@@ -274,7 +274,6 @@ describe('Soft Delete plugin tests', () => {
             await User.query().where('id', id).undelete();
 
             const user = await User.query().findById(id);
-            console.log(user);
             expect(user.active).toBe(true);
         });
     });
