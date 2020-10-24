@@ -264,6 +264,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 columnName: 'active',
                 deletedValue: false,
+                notDeletedValue: true
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -274,7 +275,7 @@ describe('Soft Delete plugin tests', () => {
             await User.query().where('id', id).undelete();
 
             const user = await User.query().findById(id);
-            expect(user.active).toBe(true);
+            expect(user.active).toBe(1);
         });
     });
 
@@ -358,7 +359,7 @@ describe('Soft Delete plugin tests', () => {
             const deletedRows = rows.filter((m) => m.deletedAt !== null);
 
             expect(rows.length).toBe(2);
-            expect(deletedRows.length).toBe(1);
+            expect(deletedRows.length).toBe(0);
         });
 
         it('should return only the non deleted records when a different columnName is specified', async () => {
