@@ -490,7 +490,7 @@ describe('Soft Delete plugin tests', () => {
                 );
 
                 expect(rows[0].contactWithFilter.length).toBe(3);
-                expect(deletedRows.length).toBe(0);
+                expect(deletedRows.length).toBe(2);
             });
         });
 
