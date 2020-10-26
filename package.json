@@ -35,6 +35,6 @@
         }
     },
     "lint-staged": {
-        "*": "yarn run lint"
+        "*.js": "yarn run lint"
     }
 }
