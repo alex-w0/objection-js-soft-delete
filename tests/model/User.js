@@ -27,9 +27,13 @@ export default function (BaseModel) {
             return {
                 contact: contactRelationShip,
                 // Create the same relationship with filter for testing purposes
-                contactWithFilter: {
+                contactNonDeleted: {
                     ...contactRelationShip,
                     filter: (f) => f.whereNotDeleted(),
+                },
+                contactDeleted: {
+                    ...contactRelationShip,
+                    filter: (f) => f.whereDeleted(),
                 },
             };
         }
