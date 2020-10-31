@@ -31,13 +31,13 @@ A plugin that adds soft-delete functionality to [Objection.js](https://github.co
 ### NPM
 
 ```sh
-npm i objection-soft-delete
+npm i objection-js-soft-delete
 ```
 
 ### Yarn
 
 ```sh
-yarn add objection-soft-delete
+yarn add objection-js-soft-delete
 ```
 
 ## Register the plugin
