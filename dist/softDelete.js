@@ -4,17 +4,14 @@ Object.defineProperty(exports, '__esModule', {
     value: true,
 });
 exports.default = void 0;
-var s = 2;
 
 const softDelete = (incomingOptions) => {
-    const options = Object.assign(
-        {
-            columnName: 'deleted',
-            deletedValue: true,
-            notDeletedValue: false,
-        },
-        incomingOptions
-    );
+    const options = {
+        columnName: 'deleted_at',
+        deletedValue: new Date(),
+        notDeletedValue: null,
+        ...incomingOptions,
+    };
     return (Model) => {
         class SDQueryBuilder extends Model.QueryBuilder {
             // override the normal delete function with one that patches the row's "deleted" column
@@ -67,7 +64,7 @@ const softDelete = (incomingOptions) => {
         return class extends Model {
             static get QueryBuilder() {
                 return SDQueryBuilder;
-            } // add a named filter for use in the .eager() function
+            } // add a named filter for use in the .withGraphFetched() function
 
             static get namedFilters() {
                 // patch the notDeleted filter into the list of namedFilters

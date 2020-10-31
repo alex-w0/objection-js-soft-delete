@@ -55,7 +55,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -71,8 +73,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -87,8 +91,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a deletedValue and a notDeletedValue is specified', async () => {
             const { User } = getModel({
-                deletedValue: null,
-                notDeletedValue: new Date(),
+                options: {
+                    deletedValue: null,
+                    notDeletedValue: new Date(),
+                },
             });
 
             const createdUser = await User.query().insertAndFetch({
@@ -123,7 +129,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -139,8 +147,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -155,8 +165,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('when a deletedValue and notDeletedValue is specified', async () => {
             const { User } = getModel({
-                deletedValue: null,
-                notDeletedValue: new Date(),
+                options: {
+                    deletedValue: null,
+                    notDeletedValue: new Date(),
+                },
             });
 
             const createdUser = await User.query().insertAndFetch({
@@ -193,7 +205,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('should delete the row when a columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -211,8 +225,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('should delete the row when a columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -246,7 +262,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('should undelete the row when a columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -262,9 +280,11 @@ describe('Soft Delete plugin tests', () => {
 
         it('should undelete the row when a columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
-                notDeletedValue: true,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                    notDeletedValue: true,
+                },
             });
 
             const { id } = await User.query().insertAndFetch({
@@ -309,7 +329,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('should return only the non deleted records when a different columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             await User.knexQuery().insert([
@@ -337,8 +359,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('should return only the non deleted records when a different columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                },
             });
 
             await User.knexQuery().insert([
@@ -488,7 +512,9 @@ describe('Soft Delete plugin tests', () => {
 
             it('should return only the non deleted records when a different columnName is specified', async () => {
                 const { User } = getModel({
-                    columnName: 'deletedDate',
+                    options: {
+                        columnName: 'deletedDate',
+                    },
                 });
 
                 await User.query().insertGraph([
@@ -530,9 +556,11 @@ describe('Soft Delete plugin tests', () => {
 
             it('should return only the non deleted records when a different columnName, deletedValue and nonDeletedValue are specified', async () => {
                 const { User } = getModel({
-                    columnName: 'active',
-                    deletedValue: false,
-                    notDeletedValue: true,
+                    options: {
+                        columnName: 'active',
+                        deletedValue: false,
+                        notDeletedValue: true,
+                    },
                 });
 
                 await User.query().insertGraph([
@@ -564,7 +592,6 @@ describe('Soft Delete plugin tests', () => {
                 const rows = await User.query().withGraphFetched(
                     'contactNonDeleted'
                 );
-                console.log(rows);
                 const deletedRows = rows[0].contactNonDeleted.filter(
                     (m) => m.active === false
                 );
@@ -604,7 +631,9 @@ describe('Soft Delete plugin tests', () => {
 
         it('should return only the deleted records when a different columnName is specified', async () => {
             const { User } = getModel({
-                columnName: 'deletedDate',
+                options: {
+                    columnName: 'deletedDate',
+                },
             });
 
             await User.knexQuery().insert([
@@ -632,8 +661,10 @@ describe('Soft Delete plugin tests', () => {
 
         it('should return only the deleted records when a different columnName and a deletedValue is specified', async () => {
             const { User } = getModel({
-                columnName: 'active',
-                deletedValue: false,
+                options: {
+                    columnName: 'active',
+                    deletedValue: false,
+                },
             });
 
             await User.knexQuery().insert([
@@ -783,7 +814,9 @@ describe('Soft Delete plugin tests', () => {
 
             it('should return only the deleted records when a different columnName is specified', async () => {
                 const { User } = getModel({
-                    columnName: 'deletedDate',
+                    options: {
+                        columnName: 'deletedDate',
+                    },
                 });
 
                 await User.query().insertGraph([
@@ -825,9 +858,11 @@ describe('Soft Delete plugin tests', () => {
 
             it('should return only the deleted records when a different columnName, deletedValue and nonDeletedValue are specified', async () => {
                 const { User } = getModel({
-                    columnName: 'active',
-                    deletedValue: false,
-                    notDeletedValue: true,
+                    options: {
+                        columnName: 'active',
+                        deletedValue: false,
+                        notDeletedValue: true,
+                    },
                 });
 
                 await User.query().insertGraph([
@@ -872,10 +907,68 @@ describe('Soft Delete plugin tests', () => {
         });
     });
 
-    // //   describe('soft delete indicator', () => {
-    //     it('should set isSoftDelete property', () => {
-    //       // eslint-disable-next-line no-unused-expressions
-    //       expect(getModel().isSoftDelete).to.be.true;
-    //     });
-    //   });
+    describe('checks if the model has a soft delete property', () => {
+        it('should set isSoftDelete property', async () => {
+            const { User } = getModel();
+
+            expect(User.isSoftDelete).toBeTrue();
+        });
+    });
+
+    describe('Lifecycle flags', () => {
+        test('checks the soft delete flag before and after an update ', async () => {
+            let beforeSoftDelete = false;
+            let afterSoftDelete = false;
+
+            const { User } = getModel({
+                beforeUpdate(args, queryContext) {
+                    if (queryContext.softDelete) {
+                        beforeSoftDelete = true;
+                    }
+                },
+                afterUpdate(args, queryContext) {
+                    if (queryContext.softDelete) {
+                        afterSoftDelete = true;
+                    }
+                },
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+            });
+
+            await User.query().deleteById(id);
+
+            expect(beforeSoftDelete).toBeTrue();
+            expect(afterSoftDelete).toBeTrue();
+        });
+
+        test('checks the undelete flag before and after an update ', async () => {
+            let beforeUndelete = false;
+            let afterUndelete = false;
+
+            const { User } = getModel({
+                beforeUpdate(args, queryContext) {
+                    if (queryContext.undelete) {
+                        beforeUndelete = true;
+                    }
+                },
+                afterUpdate(args, queryContext) {
+                    if (queryContext.undelete) {
+                        afterUndelete = true;
+                    }
+                },
+            });
+
+            const { id } = await User.query().insertAndFetch({
+                username: faker.internet.userName(),
+                deletedAt: new Date(),
+            });
+
+            await User.query().where('id', id).undelete();
+
+            expect(beforeUndelete).toBeTrue();
+            expect(afterUndelete).toBeTrue();
+        });
+    });
 });

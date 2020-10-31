@@ -63,7 +63,7 @@ const softDelete = (incomingOptions) => {
                 return SDQueryBuilder;
             }
 
-            // add a named filter for use in the .eager() function
+            // add a named filter for use in the .withGraphFetched() function
             static get namedFilters() {
                 // patch the notDeleted filter into the list of namedFilters
                 return Object.assign({}, super.namedFilters, {

@@ -1,15 +1,37 @@
 [![Build Status](https://travis-ci.com/alex-w0/objection-js-soft-delete.svg?token=r6PqdFxBVzxy7yMFo5GV&branch=master)](https://travis-ci.com/alex-w0/objection-js-soft-delete)
-[![Coverage Status](https://coveralls.io/repos/github/griffinpp/objection-soft-delete/badge.svg?branch=master)](https://coveralls.io/github/griffinpp/objection-soft-delete?branch=master)
 
-# objection-soft-delete
+# objection-js-soft-delete
+
+---
+This plugin is a fork from [objection-soft-delete](https://github.com/griffinpp/objection-soft-delete) where the author stopped maintaining the plugin. For that reason the project was completely rewritten and the [use of deprecated methods is fixed](https://github.com/griffinpp/objection-soft-delete/issues/18).
+`Important note: The default options for this plugin has been changed, so check first if you have to change these if necessary.`
+
+---
+
 A plugin that adds soft-delete functionality to [Objection.js](https://github.com/Vincit/objection.js/)
+
+* [Installation](#installation)
+* [Register the plugin](#register-the-plugin)
+* [Usage](#usage)
+  * [Methods](#methods)
+    * .whereNotDeleted()
+    * .whereDeleted()
+    * .undelete()
+    * .hardDelete()
+  * [Filters](#filters)
+    * notDeleted
+    * deleted
+    * in a relationship
+  * [Using with upsertGraph](#using-with-upsertgraph)
+  * [Lifecycle functions](#lifecycle-functions)
+
 
 ## Installation
 
 ### NPM
 
 ```sh
-npm i objection-soft-delete --save
+npm i objection-soft-delete
 ```
 
 ### Yarn
@@ -18,187 +40,144 @@ npm i objection-soft-delete --save
 yarn add objection-soft-delete
 ```
 
-## Usage
+## Register the plugin
 
-### Mixin the plugin on an object representing a table that uses a boolean column as a flag for soft delete
+The mixin provides the following configuration to override the default options:
+
+**columnName:** the column name that indicate if the record is deleted. The column must exist on the table for the model.
+Default: `'deleted_at'`
+
+**deletedValue:** define which value indicate if the record is deleted.
+Default: `new Date()` (local time zone of the server)
+
+It's also possible to use the time from the database: `knex.fn.now()`
+
+**notDeletedValue:** define which value indicate if the record is not deleted. You can set (and should) this option along with `deletedValue`.
+Default: `NULL`
 
 ```js
-// Import objection model.
-const Model = require('objection').Model;
+// Import objection and the plugin.
+import { Model } from 'objection';
+import objectionSoftDelete from 'objection-js-soft-delete';
 
-// Import the plugin
-const softDelete = require('objection-soft-delete');
+// Specify the options for this plugin. This are the defaults.
+const softDelete = objectionSoftDelete({
+    columnName: 'deleted_at',
+    deletedValue: new Date(),
+    notDeletedValue: null,
+});
 
-// Mixin the plugin and specify the column to to use.  'deleted' will be used if none is specified:
-class User extends softDelete({ columnName: 'deleted' })(Model) {
+// Inject the plugin to the model
+class User extends softDelete(Model) {
   static get tableName() {
     return 'Users';
-  }
-  
-  static get jsonSchema() {
-    return {
-      type: 'object',
-      required: [],
-
-      properties: {
-        id: { type: 'integer' },
-        // matches the columnName passed above
-        deleted: { type: 'boolean' },
-        // other columns
-      },
-    }
   }
 }
 ```
 
-#### Note: Make sure the `deleted` field of your table has a default value of `false` (and, while not required, you'll probably want to make it not nullable as well). A `deleted` value of `NULL` will result in this plugin producing unexpected behavior.
+**Note:** A `deletedValue` value of `NULL` will result in this plugin an unexpected behavior.
 
-### When `.delete()` or `.del()` is called for that model, the matching row(s) are flagged `true` instead of deleted
-#### Delete a User:
+## Usage
+
+- **Soft delete records:**
+When an record will be deleted then the deleted field is set to the value that is specified as deletedValue:
 ```js
-await User.query().where('id', 1).delete(); // db now has: { User id: 1, deleted: true, ... }
+await User.query().where('id', 1).delete();
+await User.query().where('id', 1).deleteById(1);
+
+// Deleted rows are still in the db:
+// User { id: 1, deleted_at: 'Sat Oct 31 2020 15:42:29 GMT+0100 (Central European Standard Time)' , ... }
 ```
 
-#### Or:
+#### Methods
+
+- **.whereNotDeleted():**
+Returns only records that aren't deleted.
 ```js
-const user = await User.query().where('id', 1).first();
-await user.$query().delete(); // same
+const notDeletedUsers = await User.query().whereNotDeleted();
 ```
 
-#### Deleted rows are still in the db:
-```js
-const deletedUser = await User.query().where('id', 1).first(); // => { User id: 1, deleted: true, ... }
-```
-
-#### Filter out deleted rows without having to remember each model's "deleted" columnName:
-```js
-const activeUsers = await User.query().whereNotDeleted();
-```
-
-#### Get only deleted rows:
+- **.whereDeleted():**
+Returns only records that are deleted.
 ```js
 const deletedUsers = await User.query().whereDeleted();
 ```
 
-#### Restore row(s):
+- **.undelete():**
+Restore deleted records.
+
 ```js
-await User.query().where('id', 1).undelete(); // db now has: { User id: 1, deleted: false, ... }
+await User.query().where('id', 1).undelete();
+// User { id: 1, deleted_at: null }
 ```
 
-#### Permanently remove row(s) from the db:
+- **.hardDelete():**
+Permanently delete records.
 ```js
-await User.query.where('id', 1).hardDelete(); // => row with id:1 is permanently deleted
+await User.query.where('id', 1).hardDelete();
 ```
 
-### Filtering out deleted/undeleted records in `.eager()` or `.joinRelation()`
+#### Filters
 
-#### Using the named filters
-A `notDeleted` and a `deleted` filter will be added to the list of named filters for any model that mixes in the plugin.  These filters use the `.whereNotDeleted()` and `.whereDeleted()` functions to filter records, and can be used without needing to remember the specific columnName for any model:
+A `notDeleted` and a `deleted` filter will be added to the list of named filters for any model that use this mixin. Internally they are using the methods `.whereNotDeleted()` and `.whereDeleted()` from above:
+- **notDeleted:**
+Returns only records from the relation that are not deleted.
 ```js
-// some other Model with a relation to the `User` model:
-const group = await UserGroup.query()
-  .where('id', 1)
-  .first()
-  .eager('users(notDeleted)'); // => now group.users contains only records that are not deleted
+// withGraphFetched
+const rows = await User.query().withGraphFetched('contact(notDeleted');
+// withGraphJoined
+const rows = await User.query().withGraphJoined('contact(notDeleted');
 ```
 
-Or:
+- **deleted:**
+Returns only records from the relation that are deleted.
 ```js
-// some other Model with a relation to the `User` model:
-const group = await UserGroup.query()
-  .where('id', 1)
-  .first()
-  .eager('users(deleted)'); // => now group.users contains only records that are deleted
+// withGraphFetched
+const rows = await User.query().withGraphFetched('contact(deleted');
+// withGraphJoined
+const rows = await User.query().withGraphJoined('contact(deleted');
 ```
 
-With `.joinRelation()`:
-```js
-// some other Model with a relation to the `User` model:
-const group = await UserGroup.query()
-  .where('id', 1)
-  .joinRelation('users(notDeleted)')
-  .where('users.firstName', 'like', 'a%'); // => all groups that have an undeleted user whose first name starts with 'a';
-```
+- **Relationship filter:**
+A filter can be applied also directly to a relationship:
 
-#### Using a relationship filter
-A filter can be applied directly to the relationship definition to ensure that deleted/undeleted rows never appear:
 ```js
-// some other class that has a FK to User:
-class UserGroup extends Model {
+class User extends Model {
   static get tableName() {
-    return 'UserGroups';
+    return 'user';
   }
-  
-  ...
-  
+
   static get relationMappings() {
-    return {
-      users: {
-        relation: Model.ManyToManyRelation,
-        modelClass: User,
-        join: {
-          from: 'UserGroups.id',
-          through: {
-            from: 'GroupUsers.groupId',
-            to: 'GroupUsers.userId',
+      const Contact = require('./Contact');
+
+      return {
+          contact: {
+            relation: Model.ManyToManyRelation,
+            modelClass: Contact,
+            join: {
+                from: 'user.id',
+                through: {
+                    from: 'user_contact.user_id',
+                    to: 'user_contact.contact_id',
+                },
+                to: 'contact.id',
+            },
+            // .whereNotDeleted() or .whereDeleted()
+            filter: (f) => f.whereNotDeleted(),
           },
-          to: 'Users.id',
-        },
-        filter: (f) => {
-          f.whereNotDeleted(); // or f.whereDeleted(), as needed.
-        },
-      },
-    }
+      };
   }
 }
 ```
 
 then:
 ```js
-const group = await UserGroup.query()
-  .where('id', 1)
-  .first()
-  .eager('users'); // => `User` rows are filtered out automatically without having to specify the filter here
+// Will return only records from the relationship contact that are not deleted
+await User.query().withGraphFetched('contact');
 ```
 
-### Per-model `columnName`
-If for some reason you have to deal with different column names for different models (legacy code/schemas can be a bear!), all functionality is fully supported:
-```js
-class User extends softDelete({ columnName: 'deleted' })(Model) {
-  ...
-}
-
-class UserGroup extends softDelete({ columnName: 'inactive' })(Model) {
-  ...
-}
-
-// everything will work as expected:
-await User.query()
-  .whereNotDeleted(); // => all undeleted users
-
-await UserGroup.query()
-  .whereNotDeleted(); // => all undeleted user groups
-
-await UserGroup.query()
-  .whereNotDeleted()
-  .eager('users(notDeleted)'); // => all undeleted user groups, with all related undeleted users eagerly loaded
-
-await User.query()
-  .whereDeleted()
-  .eager('groups(deleted)'); // => all deleted users, with all related deleted user groups eagerly loaded
-
-await User.query()
-  .whereNotDeleted()
-  .joinRelation('groups(notDeleted)')
-  .where('groups.name', 'like', '%local%')
-  .eager('groups(notDeleted)'); // => all undeleted users that belong to undeleted user groups that have a name containing the string 'local', eagerly load all undeleted groups for said users.
-
-// and so on...
-```
-
-### Using with `.upsertGraph()`
-This plugin was actually born out of a need to have `.upsertGraph()` soft delete in some tables, and hard delete in others, so it plays nice with
-`.upsertGraph()`:
+#### Using with upsertGraph
+This plugin was actually born out of a need to have `.upsertGraph()` soft delete in some tables, and hard delete in others.
 ```js
 // a model with soft delete
 class Phone extends softDelete(Model) {
@@ -232,33 +211,32 @@ User {
   ]
 }
 
-// then:
-
 await User.query().upsertGraph({
   id: 1,
   name: 'Johnny Cash',
   phones: [],
   emails: [],
-}); // => phone id 6 will be flagged deleted (and will still be related to Johnny!), email id 3 will be removed from the database
+});
+// => phone id 6 will be flagged deleted (and will still be related to Johnny!), email id 3 will be removed from the database
 ```
 
 ### Lifecycle Functions
 
 One issue that comes with doing soft deletes is that your calls to `.delete()` will actually trigger lifecycle functions for `.update()`, which may not be expected or desired.  To help address this, some context flags have been added to the `queryContext` that is passed into lifecycle functions to help discern whether the event that triggered (e.g.) `$beforeUpdate` was a true update, a soft delete, or an undelete:
 ```js
-  $beforeUpdate(opt, queryContext) {
-    if (queryContext.softDelete) {
-      // do something before a soft delete, possibly including calling your $beforeDelete function.
-      // Think this through carefully if you are using additional plugins, as their lifecycle
-      // functions may execute before this one depending on how you have set up your inheritance chain!
-    } else if (queryContext.undelete) {
-      // do something before an undelete
-    } else {
-      // do something before a normal update
-    }
+$beforeUpdate(opt, queryContext) {
+  if (queryContext.softDelete) {
+    // do something before a soft delete, possibly including calling your $beforeDelete function.
+    // Think this through carefully if you are using additional plugins, as their lifecycle
+    // functions may execute before this one depending on how you have set up your inheritance chain!
+  } else if (queryContext.undelete) {
+    // do something before an undelete
+  } else {
+    // do something before a normal update
   }
+}
   
-  // same procedure for $afterUpdate
+// same procedure for $afterUpdate
 ```
 Available flags are:
 * softDelete
@@ -270,34 +248,8 @@ Flags will be `true` if set, and `undefined` otherwise.
 
 All models with the soft delete mixin will have an `isSoftDelete` property, which returns `true`.
 
-## Options
-
-**columnName:** the name of the column to use as the soft delete flag on the model (Default: `'deleted'`).  The column must exist on the table for the model.
-
-You can specify different column names per-model by using the options:
 ```js
-const softDelete = require('objection-soft-delete')({
-  columnName: 'inactive',
-});
-```
-
-**deletedValue:** you can set this option to allow a different value than "true" to be set in the specified column.
-For instance, you can use the following code to make a timestamp (you need knex instance to do so)
-```js
-const softDelete = require('objection-soft-delete')({
-  columnName: 'deleted_at',
-  deletedValue: knex.fn.now(),
-});
-```
-
-**notDeletedValue:** you can set (and should) this option along with `deletedValue` to allow a different value than "false" to be set in the specified column.
-For instance, you can use the following code to restore the column to null (you need knex instance to do so)
-```js
-const softDelete = require('objection-soft-delete')({
-  columnName: 'deleted_at',
-  deletedValue: knex.fn.now(),
-  notDeletedValue: null,
-});
+const modelHasSoftDelete = User.isSoftDelete;
 ```
 
 ## Tests
@@ -324,8 +276,3 @@ or:
 ```sh
 yarn lint
 ```
-
-
-## Contributing
-
-The usual spiel: fork, fix/improve, write tests, submit PR.  I try to maintain a (mostly) consistent syntax, but am open to suggestions for improvement. Otherwise, the only two rules are: do good work, and no tests = no merge.
