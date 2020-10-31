@@ -1,6 +1,6 @@
 {
     "name": "objection-js-soft-delete",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "A plugin for objection js that supports soft delete",
     "main": "dist/softDelete.js",
     "types": "./index.d.ts",
