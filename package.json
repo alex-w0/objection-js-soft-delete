@@ -37,5 +37,9 @@
     },
     "lint-staged": {
         "*.js": "yarn run lint"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alex-w0/objection-js-soft-delete"
     }
 }
