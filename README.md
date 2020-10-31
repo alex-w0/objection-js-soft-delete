@@ -4,7 +4,7 @@
 
 ---
 This plugin is a fork from [objection-soft-delete](https://github.com/griffinpp/objection-soft-delete) where the author stopped maintaining the plugin. For that reason the project was completely rewritten and the [use of deprecated methods is fixed](https://github.com/griffinpp/objection-soft-delete/issues/18).
-`Important note: The default options for this plugin has been changed, so check first if you have to change these if necessary.`.
+`Important note: The default options for this plugin has been changed, so check first if you have to change these if necessary.`
 
 ---
 
