@@ -5,7 +5,7 @@ const softDelete = (incomingOptions) => {
         notDeletedValue: null,
         ...incomingOptions,
     };
-    console.log('test');
+
     return (Model) => {
         class SDQueryBuilder extends Model.QueryBuilder {
             // override the normal delete function with one that patches the row's "deleted" column
