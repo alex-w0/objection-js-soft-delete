@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/alex-w0/objection-js-soft-delete.svg?token=r6PqdFxBVzxy7yMFo5GV&branch=master)](https://travis-ci.com/alex-w0/objection-js-soft-delete)
+[![Build Status](https://travis-ci.com/alex-w0/objection-js-soft-delete.svg?token=r6PqdFxBVzxy7yMFo5GV&branch=master)](https://travis-ci.com/alex-w0/objection-js-soft-delete) ![NPM](https://img.shields.io/npm/l/objection-js-soft-delete)
 
 # objection-js-soft-delete
 
@@ -82,7 +82,7 @@ class User extends softDelete(Model) {
 When an record will be deleted then the deleted field is set to the value that is specified as deletedValue:
 ```js
 await User.query().where('id', 1).delete();
-await User.query().where('id', 1).deleteById(1);
+await User.query().deleteById(1);
 
 // Deleted rows are still in the db:
 // User { id: 1, deleted_at: 'Sat Oct 31 2020 15:42:29 GMT+0100 (Central European Standard Time)' , ... }
