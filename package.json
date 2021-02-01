@@ -12,7 +12,7 @@
         "@babel/eslint-parser": "^7.12.1",
         "@babel/preset-env": "^7.12.7",
         "eslint": "^7.14.0",
-        "eslint-config-prettier": "^6.15.0",
+        "eslint-config-prettier": "^7.2.0",
         "eslint-plugin-prettier": "^3.1.4",
         "faker": "^5.1.0",
         "husky": "^4.3.0",
