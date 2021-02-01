@@ -21,8 +21,7 @@
         "knex": "^0.21.17",
         "lint-staged": "^10.5.3",
         "objection": "^2.2.14",
-        "prettier": "^2.2.1",
-        "sqlite3": "^5.0.1"
+        "prettier": "^2.2.1"
     },
     "scripts": {
         "build": "babel src -d dist",
