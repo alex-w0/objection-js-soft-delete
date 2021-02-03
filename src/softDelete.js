@@ -63,6 +63,18 @@ const softDelete = (incomingOptions) => {
                 return SDQueryBuilder;
             }
 
+            static query(...args) {
+                let query = super.query(...args);
+
+                // Remove the deleted entries
+                query = query.where(
+                    `${query.modelClass().tableName}.${options.columnName}`,
+                    options.notDeletedValue
+                );
+
+                return query.runAfter((result) => result);
+            }
+
             // add a named filter for use in the .withGraphFetched() function
             static get namedFilters() {
                 // patch the notDeleted filter into the list of namedFilters

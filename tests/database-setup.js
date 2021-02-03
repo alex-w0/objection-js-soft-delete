@@ -51,7 +51,14 @@ async function down() {
     return knexConnection.destroy();
 }
 
+async function clearTables() {
+    await knexConnection('user').del();
+    await knexConnection('contact').del();
+    await knexConnection('user_contact').del();
+}
+
 export default {
     up,
     down,
+    clearTables,
 };

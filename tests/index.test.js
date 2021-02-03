@@ -1,20 +1,18 @@
 import 'jest-extended';
 import faker from 'faker';
 import databaseSetup from './database-setup.js';
-import knexConnection from './config.js';
 import getModel from './model/index.js';
 
-function createDeletedAtColumn(knex) {
-    return knexConnection.schema.table('TestObjects', (table) => {
-        table.timestamp('deleted_at');
-    });
-}
+/*
+    SQL Debugging example:
 
-function removeDeletedAtColumn(knex) {
-    return knexConnection.schema.table('TestObjects', (table) => {
-        table.dropColumn('deleted_at');
-    });
-}
+    const builder = Users.query()
+    .findById(1)
+    .toKnexQuery()
+
+    console.log(builder.toQuery())
+    // "select `users`.* from `users` where `users`.`id` = 1"
+*/
 
 beforeAll(() => {
     return databaseSetup.up();
@@ -25,12 +23,8 @@ afterAll(async () => {
 });
 
 describe('Soft Delete plugin tests', () => {
-    const startDate = new Date();
-
     afterEach(async () => {
-        const { User } = getModel();
-
-        await User.query().hardDelete();
+        await databaseSetup.clearTables();
     });
 
     describe('.deleteById()', () => {
@@ -299,7 +293,7 @@ describe('Soft Delete plugin tests', () => {
         });
     });
 
-    describe('.whereNotDeleted()', () => {
+    describe.only('.whereNotDeleted()', () => {
         it('should return only the non deleted records', async () => {
             const { User } = getModel();
 
@@ -320,7 +314,7 @@ describe('Soft Delete plugin tests', () => {
                 },
             ]);
 
-            const rows = await User.query().whereNotDeleted();
+            const rows = await User.query();
             const deletedRows = rows.filter((m) => m.deletedAt !== null);
 
             expect(rows.length).toBe(2);
@@ -350,7 +344,10 @@ describe('Soft Delete plugin tests', () => {
                 },
             ]);
 
-            const rows = await User.query().whereNotDeleted();
+            const rows = await User.query();
+
+            console.log(rows);
+
             const deletedRows = rows.filter((m) => m.deletedDate !== null);
 
             expect(rows.length).toBe(3);
@@ -389,217 +386,217 @@ describe('Soft Delete plugin tests', () => {
             expect(deletedRows.length).toBe(0);
         });
 
-        describe('filter option inside a relationship', () => {
-            it('should return only the non deleted contacts', async () => {
-                const { User } = getModel();
+        // describe('filter option inside a relationship', () => {
+        //     it('should return only the non deleted contacts', async () => {
+        //         const { User } = getModel();
 
-                await User.query().insertGraph([
-                    {
-                        username: faker.internet.userName(),
-                        contactNonDeleted: [
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                        ],
-                    },
-                ]);
+        //         await User.query().insertGraph([
+        //             {
+        //                 username: faker.internet.userName(),
+        //                 contactNonDeleted: [
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                 ],
+        //             },
+        //         ]);
 
-                const rows = await User.query().withGraphFetched(
-                    'contactNonDeleted'
-                );
-                const deletedRows = rows[0].contactNonDeleted.filter(
-                    (m) => m.deletedAt !== null
-                );
+        //         const rows = await User.query().withGraphFetched(
+        //             'contactNonDeleted'
+        //         );
+        //         const deletedRows = rows[0].contactNonDeleted.filter(
+        //             (m) => m.deletedAt !== null
+        //         );
 
-                expect(rows[0].contactNonDeleted.length).toBe(2);
-                expect(deletedRows.length).toBe(0);
-            });
+        //         expect(rows[0].contactNonDeleted.length).toBe(2);
+        //         expect(deletedRows.length).toBe(0);
+        //     });
 
-            it('should return only the not deleted contacts when the filter is directly used on the option withGraphFetched', async () => {
-                const { User } = getModel();
+        //     it('should return only the not deleted contacts when the filter is directly used on the option withGraphFetched', async () => {
+        //         const { User } = getModel();
 
-                await User.query().insertGraph([
-                    {
-                        username: faker.internet.userName(),
-                        contact: [
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                        ],
-                    },
-                ]);
+        //         await User.query().insertGraph([
+        //             {
+        //                 username: faker.internet.userName(),
+        //                 contact: [
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                 ],
+        //             },
+        //         ]);
 
-                const rows = await User.query().withGraphFetched(
-                    'contact(notDeleted)'
-                );
-                const deletedRows = rows[0].contact.filter(
-                    (m) => m.deletedAt !== null
-                );
+        //         const rows = await User.query().withGraphFetched(
+        //             'contact(notDeleted)'
+        //         );
+        //         const deletedRows = rows[0].contact.filter(
+        //             (m) => m.deletedAt !== null
+        //         );
 
-                expect(rows[0].contact.length).toBe(2);
-                expect(deletedRows.length).toBe(0);
-            });
+        //         expect(rows[0].contact.length).toBe(2);
+        //         expect(deletedRows.length).toBe(0);
+        //     });
 
-            it('should return only the not deleted contacts when the filter is directly used on the option withGraphJoined', async () => {
-                const { User } = getModel();
+        //     it('should return only the not deleted contacts when the filter is directly used on the option withGraphJoined', async () => {
+        //         const { User } = getModel();
 
-                await User.query().insertGraph([
-                    {
-                        username: faker.internet.userName(),
-                        contact: [
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedAt: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                        ],
-                    },
-                ]);
+        //         await User.query().insertGraph([
+        //             {
+        //                 username: faker.internet.userName(),
+        //                 contact: [
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedAt: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                 ],
+        //             },
+        //         ]);
 
-                const rows = await User.query().withGraphJoined(
-                    'contact(notDeleted)'
-                );
-                const deletedRows = rows[0].contact.filter(
-                    (m) => m.deletedAt !== null
-                );
+        //         const rows = await User.query().withGraphJoined(
+        //             'contact(notDeleted)'
+        //         );
+        //         const deletedRows = rows[0].contact.filter(
+        //             (m) => m.deletedAt !== null
+        //         );
 
-                expect(rows[0].contact.length).toBe(2);
-                expect(deletedRows.length).toBe(0);
-            });
+        //         expect(rows[0].contact.length).toBe(2);
+        //         expect(deletedRows.length).toBe(0);
+        //     });
 
-            it('should return only the non deleted records when a different columnName is specified', async () => {
-                const { User } = getModel({
-                    options: {
-                        columnName: 'deletedDate',
-                    },
-                });
+        //     it('should return only the non deleted records when a different columnName is specified', async () => {
+        //         const { User } = getModel({
+        //             options: {
+        //                 columnName: 'deletedDate',
+        //             },
+        //         });
 
-                await User.query().insertGraph([
-                    {
-                        username: faker.internet.userName(),
-                        contactNonDeleted: [
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedDate: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                deletedDate: new Date(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                        ],
-                    },
-                ]);
+        //         await User.query().insertGraph([
+        //             {
+        //                 username: faker.internet.userName(),
+        //                 contactNonDeleted: [
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedDate: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         deletedDate: new Date(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                 ],
+        //             },
+        //         ]);
 
-                const rows = await User.query().withGraphFetched(
-                    'contactNonDeleted'
-                );
-                const deletedRows = rows[0].contactNonDeleted.filter(
-                    (m) => m.deletedDate !== null
-                );
+        //         const rows = await User.query().withGraphFetched(
+        //             'contactNonDeleted'
+        //         );
+        //         const deletedRows = rows[0].contactNonDeleted.filter(
+        //             (m) => m.deletedDate !== null
+        //         );
 
-                expect(rows[0].contactNonDeleted.length).toBe(2);
-                expect(deletedRows.length).toBe(0);
-            });
+        //         expect(rows[0].contactNonDeleted.length).toBe(2);
+        //         expect(deletedRows.length).toBe(0);
+        //     });
 
-            it('should return only the non deleted records when a different columnName, deletedValue and nonDeletedValue are specified', async () => {
-                const { User } = getModel({
-                    options: {
-                        columnName: 'active',
-                        deletedValue: false,
-                        notDeletedValue: true,
-                    },
-                });
+        //     it('should return only the non deleted records when a different columnName, deletedValue and nonDeletedValue are specified', async () => {
+        //         const { User } = getModel({
+        //             options: {
+        //                 columnName: 'active',
+        //                 deletedValue: false,
+        //                 notDeletedValue: true,
+        //             },
+        //         });
 
-                await User.query().insertGraph([
-                    {
-                        username: faker.internet.userName(),
-                        contactNonDeleted: [
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                active: 0,
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                                active: 1,
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                            {
-                                firstName: faker.name.firstName(),
-                                lastName: faker.name.lastName(),
-                            },
-                        ],
-                    },
-                ]);
+        //         await User.query().insertGraph([
+        //             {
+        //                 username: faker.internet.userName(),
+        //                 contactNonDeleted: [
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         active: 0,
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                         active: 1,
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                     {
+        //                         firstName: faker.name.firstName(),
+        //                         lastName: faker.name.lastName(),
+        //                     },
+        //                 ],
+        //             },
+        //         ]);
 
-                const rows = await User.query().withGraphFetched(
-                    'contactNonDeleted'
-                );
-                const deletedRows = rows[0].contactNonDeleted.filter(
-                    (m) => m.active === false
-                );
+        //         const rows = await User.query().withGraphFetched(
+        //             'contactNonDeleted'
+        //         );
+        //         const deletedRows = rows[0].contactNonDeleted.filter(
+        //             (m) => m.active === false
+        //         );
 
-                expect(rows[0].contactNonDeleted.length).toBe(3);
-                expect(deletedRows.length).toBe(0);
-            });
-        });
+        //         expect(rows[0].contactNonDeleted.length).toBe(3);
+        //         expect(deletedRows.length).toBe(0);
+        //     });
+        // });
     });
 
     describe('.whereDeleted()', () => {
