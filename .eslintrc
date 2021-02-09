@@ -1,10 +1,35 @@
 {
-    "env": {
+  "env": {
     "es6": true
   },
   "parserOptions": {
     "ecmaVersion": 2020
   },
-    "parser": "@babel/eslint-parser",
-    "extends": ["plugin:prettier/recommended"]
+  "extends": ["airbnb-base", "plugin:prettier/recommended"],
+  "rules": {
+        "max-classes-per-file": ["error", 2],
+        "prettier/prettier": "error",
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "js": "always",
+                "jsx": "always",
+                "ts": "always",
+                "tsx": "always"
+            }
+        ],
+
+        "import/prefer-default-export": "off",
+        "no-unused-vars": ["error", { "argsIgnorePattern": "next" }]
+    },
+    "overrides": [
+        {
+            "files": ["*.test.js", "*.spec.js"],
+            "plugins": ["jest"],
+            "env": {
+              "jest/globals": true
+            }
+        }
+    ]
 }

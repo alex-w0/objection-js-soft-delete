@@ -5,13 +5,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-const softDelete = incomingOptions => {
-  const options = {
-    columnName: 'deleted_at',
-    deletedValue: new Date(),
-    notDeletedValue: null,
-    ...incomingOptions
-  };
+const softDelete = options => {
+  if (options.columnName === undefined) {
+    throw new Error("Option 'columnName' is not defined");
+  } else if (typeof options.columnName !== 'string') {
+    throw new Error("Option 'columnName' must be a string");
+  }
+
+  if (options.deletedValue === undefined) {
+    throw new Error("Option 'deletedValue' is not defined");
+  }
+
+  if (options.notDeletedValue === undefined) {
+    throw new Error("Option 'notDeletedValue' is not defined");
+  }
+
   return Model => {
     class SDQueryBuilder extends Model.QueryBuilder {
       // override the normal delete function with one that patches the row's "deleted" column
@@ -27,28 +35,17 @@ const softDelete = incomingOptions => {
 
       hardDelete() {
         return super.delete();
-      } // provide a way to undo the delete
+      } // restore the deleted row
 
 
-      undelete() {
+      restore() {
         this.context({
-          undelete: true
+          restore: true
         });
         const patch = {};
         patch[options.columnName] = options.notDeletedValue;
         return this.patch(patch);
-      } // provide a way to filter to ONLY deleted records without having to remember the column name
-
-
-      whereDeleted() {
-        // this if is for backwards compatibility, to protect those that used a nullable `deleted` field
-        if (options.deletedValue === true) {
-          return this.where(`${this.modelClass().tableName}.${options.columnName}`, options.deletedValue);
-        } // qualify the column name
-
-
-        return this.whereNot(`${this.modelClass().tableName}.${options.columnName}`, options.notDeletedValue);
-      } // provide a way to filter out deleted records without having to remember the column name
+      } // get only the non deleted records
 
 
       whereNotDeleted() {
@@ -61,19 +58,28 @@ const softDelete = incomingOptions => {
     return class extends Model {
       static get QueryBuilder() {
         return SDQueryBuilder;
+      }
+
+      static query(...args) {
+        let query = super.query(...args);
+        query = query.whereNotDeleted();
+        return query.runAfter(result => result);
+      }
+
+      static queryWithDeleted(...args) {
+        const query = super.query(...args); // Somehow modify the query.
+
+        return query.runAfter(result => result);
       } // add a named filter for use in the .withGraphFetched() function
 
 
       static get namedFilters() {
         // patch the notDeleted filter into the list of namedFilters
-        return Object.assign({}, super.namedFilters, {
-          notDeleted: b => {
-            b.whereNotDeleted();
-          },
+        return { ...super.namedFilters,
           deleted: b => {
             b.whereDeleted();
           }
-        });
+        };
       }
 
       static get isSoftDelete() {

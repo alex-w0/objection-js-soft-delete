@@ -8,7 +8,7 @@ declare module 'objection-js-soft-delete' {
 
         delete(): this['NumberQueryBuilderType'];
         hardDelete(): this['NumberQueryBuilderType'];
-        undelete(): this['NumberQueryBuilderType'];
+        restore(): this['NumberQueryBuilderType'];
         whereDeleted(): this['ArrayQueryBuilderType'];
         whereNotDeleted(): this['ArrayQueryBuilderType'];
     }

@@ -1,12 +1,13 @@
 import { Model } from 'objection';
 
-export default function (BaseModel) {
+export default (BaseModel) => {
     const user = class User extends BaseModel {
         static get tableName() {
             return 'user';
         }
 
         static get relationMappings() {
+            // eslint-disable-next-line global-require
             const initContact = require('./Contact');
 
             const Contact = initContact.default(BaseModel);
@@ -40,4 +41,4 @@ export default function (BaseModel) {
     };
 
     return user;
-}
+};

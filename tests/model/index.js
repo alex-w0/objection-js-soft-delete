@@ -1,9 +1,9 @@
 import { Model } from 'objection';
 import softDelete from '../../src/softDelete.js';
-import initUser from './User';
-import initContact from './Contact';
+import initUser from './User.js';
+import initContact from './Contact.js';
 
-export default function ({ options, beforeUpdate, afterUpdate } = {}) {
+export default ({ options, beforeUpdate, afterUpdate } = {}) => {
     class BaseModel extends softDelete(options)(Model) {
         async $beforeUpdate(opt, queryContext) {
             await super.$beforeUpdate(opt, queryContext);
@@ -26,4 +26,4 @@ export default function ({ options, beforeUpdate, afterUpdate } = {}) {
         User: initUser(BaseModel),
         Contact: initContact(BaseModel),
     };
-}
+};
