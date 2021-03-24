@@ -4,18 +4,6 @@ import databaseSetup from './database-setup.js';
 import knexConnection from './config.js';
 import getModel from './model/index.js';
 
-function createDeletedAtColumn(knex) {
-    return knexConnection.schema.table('TestObjects', (table) => {
-        table.timestamp('deleted_at');
-    });
-}
-
-function removeDeletedAtColumn(knex) {
-    return knexConnection.schema.table('TestObjects', (table) => {
-        table.dropColumn('deleted_at');
-    });
-}
-
 beforeAll(() => {
     return databaseSetup.up();
 });
@@ -25,8 +13,6 @@ afterAll(async () => {
 });
 
 describe('Soft Delete plugin tests', () => {
-    const startDate = new Date();
-
     afterEach(async () => {
         const { User } = getModel();
 
@@ -916,7 +902,7 @@ describe('Soft Delete plugin tests', () => {
     });
 
     describe('Lifecycle flags', () => {
-        test('checks the soft delete flag before and after an update ', async () => {
+        test.only('checks the soft delete flag before and after an update ', async () => {
             let beforeSoftDelete = false;
             let afterSoftDelete = false;
 
