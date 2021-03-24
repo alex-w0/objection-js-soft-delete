@@ -123,18 +123,18 @@ A `notDeleted` and a `deleted` filter will be added to the list of named filters
 Returns only records from the relation that are not deleted.
 ```js
 // withGraphFetched
-const rows = await User.query().withGraphFetched('contact(notDeleted');
+const rows = await User.query().withGraphFetched('contact(notDeleted)');
 // withGraphJoined
-const rows = await User.query().withGraphJoined('contact(notDeleted');
+const rows = await User.query().withGraphJoined('contact(notDeleted)');
 ```
 
 - **deleted:**
 Returns only records from the relation that are deleted.
 ```js
 // withGraphFetched
-const rows = await User.query().withGraphFetched('contact(deleted');
+const rows = await User.query().withGraphFetched('contact(deleted)');
 // withGraphJoined
-const rows = await User.query().withGraphJoined('contact(deleted');
+const rows = await User.query().withGraphJoined('contact(deleted)');
 ```
 
 - **Relationship filter:**
