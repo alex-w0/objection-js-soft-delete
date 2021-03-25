@@ -61,19 +61,20 @@ const softDelete = incomingOptions => {
     return class extends Model {
       static get QueryBuilder() {
         return SDQueryBuilder;
-      } // add a named filter for use in the .withGraphFetched() function
+      }
 
+      static get modifiers() {
+        return { ...super.modifiers,
 
-      static get namedFilters() {
-        // patch the notDeleted filter into the list of namedFilters
-        return Object.assign({}, super.namedFilters, {
-          notDeleted: b => {
-            b.whereNotDeleted();
+          notDeleted(builder) {
+            builder.whereNotDeleted();
           },
-          deleted: b => {
-            b.whereDeleted();
+
+          deleted(builder) {
+            builder.whereDeleted();
           }
-        });
+
+        };
       }
 
       static get isSoftDelete() {
