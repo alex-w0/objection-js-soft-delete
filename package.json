@@ -22,7 +22,7 @@
         "lint-staged": "^10.5.3",
         "objection": "^2.2.14",
         "prettier": "^2.2.1",
-        "sqlite3": "5.0.0"
+        "sqlite3": "5.0.2"
     },
     "scripts": {
         "build": "babel src -d dist",
