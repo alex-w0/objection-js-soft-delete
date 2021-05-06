@@ -28,8 +28,8 @@ declare module 'objection-js-soft-delete' {
     export default function softDelete<T extends typeof Model>(
         options?: Partial<{
             columnName: string;
-            deletedValue: Date | true | number;
-            notDeletedValue: false | null;
+            deletedValue: Date | boolean | number;
+            notDeletedValue: boolean | null;
         }>
     ): (model: T) => SDStatic<T> & Omit<T, 'new'> & T['prototype'];
 }
