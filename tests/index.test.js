@@ -902,7 +902,7 @@ describe('Soft Delete plugin tests', () => {
     });
 
     describe('Lifecycle flags', () => {
-        test.only('checks the soft delete flag before and after an update ', async () => {
+        test('checks the soft delete flag before and after an update ', async () => {
             let beforeSoftDelete = false;
             let afterSoftDelete = false;
 
