@@ -17,7 +17,7 @@
         "faker": "^5.2.0",
         "husky": "^7.0.0",
         "jest": "^27.0.1",
-        "jest-extended": "^0.11.5",
+        "jest-extended": "^1.1.0",
         "knex": "^0.95.4",
         "lint-staged": "^12.0.2",
         "objection": "^2.2.14",
