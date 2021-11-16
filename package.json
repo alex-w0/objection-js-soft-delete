@@ -18,9 +18,9 @@
         "husky": "^7.0.4",
         "jest": "^27.3.1",
         "jest-extended": "^1.1.0",
-        "knex": "^0.21.21",
+        "knex": "^0.95.14",
         "lint-staged": "^12.0.2",
-        "objection": "^2.2.18",
+        "objection": "^3.0.0",
         "prettier": "^2.4.1",
         "sqlite3": "5.0.2"
     },
