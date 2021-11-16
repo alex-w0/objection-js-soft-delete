@@ -23,12 +23,10 @@ describe('Soft Delete plugin tests', () => {
         test('when nothing is specified', async () => {
             const { User } = getModel();
 
-            const {
-                id,
-                deletedAt: deletedAtCreate,
-            } = await User.query().insertAndFetch({
-                username: faker.internet.userName(),
-            });
+            const { id, deletedAt: deletedAtCreate } =
+                await User.query().insertAndFetch({
+                    username: faker.internet.userName(),
+                });
 
             expect(deletedAtCreate).toBeNull();
 
@@ -36,7 +34,7 @@ describe('Soft Delete plugin tests', () => {
 
             const { deletedAt } = await User.query().findById(id);
 
-            expect(deletedAt).toBeString();
+            expect(typeof deletedAt).toBe('string');
         });
 
         it('when a columnName is specified', async () => {
@@ -54,7 +52,7 @@ describe('Soft Delete plugin tests', () => {
 
             const user = await User.query().findById(id);
 
-            expect(user.deletedDate).toBeString();
+            expect(typeof user.deletedDate).toBe('string');
         });
 
         it('when a columnName and a deletedValue is specified', async () => {
@@ -89,7 +87,7 @@ describe('Soft Delete plugin tests', () => {
                 deletedAt: new Date(),
             });
 
-            expect(createdUser.deletedAt).toBeString();
+            expect(typeof createdUser.deletedAt).toBe('string');
 
             await User.query().deleteById(createdUser.id);
 
@@ -110,7 +108,7 @@ describe('Soft Delete plugin tests', () => {
 
             const user = await User.query().findById(id);
 
-            expect(user.deletedAt).toBeString();
+            expect(typeof user.deletedAt).toBe('string');
         });
 
         it('when a columnName is specified', async () => {
@@ -128,7 +126,7 @@ describe('Soft Delete plugin tests', () => {
 
             const user = await User.query().findById(id);
 
-            expect(user.deletedDate).toBeString();
+            expect(typeof user.deletedDate).toBe('string');
         });
 
         it('when a columnName and a deletedValue is specified', async () => {
@@ -163,7 +161,7 @@ describe('Soft Delete plugin tests', () => {
                 deletedAt: new Date(),
             });
 
-            expect(createdUser.deletedAt).toBeString();
+            expect(typeof createdUser.deletedAt).toBe('string');
 
             await User.query().where('id', createdUser.id).delete();
 
@@ -897,7 +895,7 @@ describe('Soft Delete plugin tests', () => {
         it('should set isSoftDelete property', async () => {
             const { User } = getModel();
 
-            expect(User.isSoftDelete).toBeTrue();
+            expect(User.isSoftDelete).toBe(true);
         });
     });
 
@@ -925,8 +923,8 @@ describe('Soft Delete plugin tests', () => {
 
             await User.query().deleteById(id);
 
-            expect(beforeSoftDelete).toBeTrue();
-            expect(afterSoftDelete).toBeTrue();
+            expect(beforeSoftDelete).toBe(true);
+            expect(afterSoftDelete).toBe(true);
         });
 
         test('checks the undelete flag before and after an update ', async () => {
@@ -953,8 +951,8 @@ describe('Soft Delete plugin tests', () => {
 
             await User.query().where('id', id).undelete();
 
-            expect(beforeUndelete).toBeTrue();
-            expect(afterUndelete).toBeTrue();
+            expect(beforeUndelete).toBe(true);
+            expect(afterUndelete).toBe(true);
         });
     });
 });
