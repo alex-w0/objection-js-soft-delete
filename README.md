@@ -2,11 +2,6 @@
 
 # objection-js-soft-delete
 
----
-This plugin is a fork from [objection-soft-delete](https://github.com/griffinpp/objection-soft-delete) where the author stopped maintaining the plugin. For that reason the project was completely rewritten and the [use of deprecated methods is fixed](https://github.com/griffinpp/objection-soft-delete/issues/18).
-`Important note: The default options for this plugin has been changed, so check first if you have to change these if necessary.`
-
----
 A plugin that adds soft-delete functionality to [Objection.js](https://github.com/Vincit/objection.js/)
 
 * [Installation](#installation)
