@@ -8,8 +8,10 @@ export default function (BaseModel) {
 
         static get relationMappings() {
             const initContact = require('./Contact');
+            const initAnimal = require('./Animal');
 
             const Contact = initContact.default(BaseModel);
+            const Animal = initAnimal.default(BaseModel);
 
             const contactRelationShip = {
                 relation: Model.ManyToManyRelation,
@@ -26,6 +28,15 @@ export default function (BaseModel) {
 
             return {
                 contact: contactRelationShip,
+                animals: {
+                    relation: Model.HasManyRelation,
+                    modelClass: Animal,
+                    join: {
+                        from: 'user.id',
+                        to: 'animal.userId',
+                    },
+                    filter: (f) => f.whereNotDeleted(),
+                },
                 // Create the same relationship with filter for testing purposes
                 contactNonDeleted: {
                     ...contactRelationShip,

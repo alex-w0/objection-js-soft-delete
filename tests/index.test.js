@@ -583,6 +583,83 @@ describe('Soft Delete plugin tests', () => {
                 expect(rows[0].contactNonDeleted.length).toBe(3);
                 expect(deletedRows.length).toBe(0);
             });
+
+            it('should check if the filtering works when the relation name is different as the model name', async () => {
+                const { User } = getModel({
+                    options: {
+                        columnName: 'deletedAt',
+                    },
+                });
+
+                const userWithAnimals = [
+                    {
+                        username: faker.internet.userName(),
+                        animals: [
+                            {
+                                name: faker.animal.dog(),
+                                deletedAt: new Date(),
+                            },
+                            {
+                                name: faker.animal.dog(),
+                                deletedAt: null,
+                            },
+                        ],
+                    },
+                    {
+                        username: faker.internet.userName(),
+                        animals: [
+                            {
+                                name: faker.animal.bear(),
+                                deletedAt: null,
+                            },
+                            {
+                                name: faker.animal.dog(),
+                                deletedAt: null,
+                            },
+                        ],
+                    },
+                    {
+                        username: faker.internet.userName(),
+                        animals: [
+                            {
+                                name: faker.animal.cat(),
+                                deletedAt: new Date(),
+                            },
+                            {
+                                name: faker.animal.dog(),
+                                deletedAt: new Date(),
+                            },
+                        ],
+                    },
+                ];
+
+                await User.query().insertGraph([
+                    ...userWithAnimals,
+                    {
+                        username: faker.internet.userName(),
+                        deletedAt: null,
+                    },
+                    {
+                        username: faker.internet.userName(),
+                        deletedAt: new Date(),
+                    },
+                    {
+                        username: faker.internet.userName(),
+                        deletedAt: null,
+                    },
+                ]);
+
+                const rows = await User.query().whereExists(
+                    User.relatedQuery('animals')
+                );
+
+                const usersWithNonDeletedAnimals = userWithAnimals.filter(
+                    (user) =>
+                        user.animals.some((animal) => animal.deletedAt === null)
+                );
+
+                expect(rows.length).toBe(usersWithNonDeletedAnimals.length);
+            });
         });
     });
 

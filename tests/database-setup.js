@@ -39,6 +39,20 @@ function up() {
                 .inTable('user')
                 .onUpdate('CASCADE')
                 .onDelete('CASCADE');
+        })
+        .createTable('animal', (table) => {
+            table.increments('id').primary();
+            table.string('name');
+            table.integer('user_id').unsigned().notNullable();
+            table.timestamp('deleted_date').defaultTo(null);
+            table.timestamp('deleted_at').defaultTo(null);
+
+            table
+                .foreign('user_id')
+                .references('id')
+                .inTable('user')
+                .onUpdate('CASCADE')
+                .onDelete('CASCADE');
         });
 }
 
@@ -46,7 +60,8 @@ async function down() {
     await knexConnection.schema
         .dropTable('user')
         .dropTable('contact')
-        .dropTable('user_contact');
+        .dropTable('user_contact')
+        .dropTable('animal');
 
     return knexConnection.destroy();
 }
