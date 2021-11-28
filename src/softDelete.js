@@ -35,25 +35,27 @@ const softDelete = (incomingOptions) => {
 
             // provide a way to filter to ONLY deleted records without having to remember the column name
             whereDeleted() {
+                const tableRef = this.tableRefFor(this.modelClass());
                 // this if is for backwards compatibility, to protect those that used a nullable `deleted` field
                 if (options.deletedValue === true) {
                     return this.where(
-                        `${this.modelClass().tableName}.${options.columnName}`,
+                        `${tableRef}.${options.columnName}`,
                         options.deletedValue
                     );
                 }
                 // qualify the column name
                 return this.whereNot(
-                    `${this.modelClass().tableName}.${options.columnName}`,
+                    `${tableRef}.${options.columnName}`,
                     options.notDeletedValue
                 );
             }
 
             // provide a way to filter out deleted records without having to remember the column name
             whereNotDeleted() {
+                const tableRef = this.tableRefFor(this.modelClass());
                 // qualify the column name
                 return this.where(
-                    `${this.modelClass().tableName}.${options.columnName}`,
+                    `${tableRef}.${options.columnName}`,
                     options.notDeletedValue
                 );
             }

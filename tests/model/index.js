@@ -1,6 +1,7 @@
 import { Model } from 'objection';
 import softDelete from '../../src/softDelete.js';
 import initUser from './User';
+import initAnimal from './Animal';
 import initContact from './Contact';
 
 export default function ({ options, beforeUpdate, afterUpdate } = {}) {
@@ -24,6 +25,7 @@ export default function ({ options, beforeUpdate, afterUpdate } = {}) {
 
     return {
         User: initUser(BaseModel),
+        Animal: initAnimal(BaseModel),
         Contact: initContact(BaseModel),
     };
 }
