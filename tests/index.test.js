@@ -1,5 +1,5 @@
 import 'jest-extended';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import databaseSetup from './database-setup.js';
 import knexConnection from './config.js';
 import getModel from './model/index.js';
