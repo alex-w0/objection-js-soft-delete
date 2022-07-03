@@ -1,19 +1,28 @@
-const softDelete = (incomingOptions) => {
+import { Model } from "objection";
+
+interface PluginOptions {
+    columnName: string,
+    deletedValue: Date | boolean | number,
+    notDeletedValue: boolean | null;
+}
+
+function softDelete<T extends typeof Model>(pluginOptions?: Partial<PluginOptions>) {
     const options = {
         columnName: 'deleted_at',
         deletedValue: new Date(),
         notDeletedValue: null,
-        ...incomingOptions,
+        ...pluginOptions,
     };
 
-    return (Model) => {
-        class SDQueryBuilder extends Model.QueryBuilder {
+    return (Model: T) => {
+        class SDQueryBuilder extends Model.QueryBuilder<Model> {
             // override the normal delete function with one that patches the row's "deleted" column
-            delete() {
+            delete(): this['NumberQueryBuilderType'] {
                 this.context({
                     softDelete: true,
                 });
-                const patch = {};
+                const patch: Record<string, unknown> = {};
+
                 patch[options.columnName] = options.deletedValue;
                 return this.patch(patch);
             }
@@ -28,14 +37,16 @@ const softDelete = (incomingOptions) => {
                 this.context({
                     undelete: true,
                 });
-                const patch = {};
+                const patch: Record<string, unknown> = {};
                 patch[options.columnName] = options.notDeletedValue;
                 return this.patch(patch);
             }
 
             // provide a way to filter to ONLY deleted records without having to remember the column name
             whereDeleted() {
-                const tableRef = this.tableRefFor(this.modelClass());
+                const modelClass = this.modelClass() as T
+                const tableRef = this.tableRefFor(modelClass);
+
                 // this if is for backwards compatibility, to protect those that used a nullable `deleted` field
                 if (options.deletedValue === true) {
                     return this.where(
@@ -52,7 +63,9 @@ const softDelete = (incomingOptions) => {
 
             // provide a way to filter out deleted records without having to remember the column name
             whereNotDeleted() {
-                const tableRef = this.tableRefFor(this.modelClass());
+                const modelClass: T = this.modelClass() as any
+                const tableRef = this.tableRefFor(modelClass);
+
                 // qualify the column name
                 return this.where(
                     `${tableRef}.${options.columnName}`,
@@ -60,17 +73,19 @@ const softDelete = (incomingOptions) => {
                 );
             }
         }
+
         return class extends Model {
+            
             static get QueryBuilder() {
                 return SDQueryBuilder;
             }
-            static get modifiers() {
+
+            static get modifiers()  {
                 return {
-                    ...super.modifiers,
-                    notDeleted(builder) {
+                    notDeleted(builder: SDQueryBuilder) {
                         builder.whereNotDeleted();
                     },
-                    deleted(builder) {
+                    deleted(builder: SDQueryBuilder) {
                         builder.whereDeleted();
                     },
                 };
