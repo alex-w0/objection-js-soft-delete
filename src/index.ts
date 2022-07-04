@@ -103,7 +103,6 @@ function softDelete(pluginOptions?: Partial<PluginOptions>) {
   }
 
   return function <T extends SDModelConstructor>(Base: T) {
-    // @ts-ignore
     return class extends Base {
       public static options = options;
       static QueryBuilder = SDQueryBuilder;
