@@ -3,6 +3,7 @@ import {
     QueryBuilder,
     Page,
     PartialModelObject,
+    Modifiers,
 } from 'objection';
 
 interface PluginOptions {
@@ -11,32 +12,17 @@ interface PluginOptions {
     notDeletedValue: boolean | null;
 }
 
-function softDelete(pluginOptions?: Partial<PluginOptions>) {
-    const options: PluginOptions = {
+export type ModelConstructor<T extends Model = Model> = new (
+    ...args: any[]
+) => T;
+
+export function softDelete(pluginOptions?: Partial<PluginOptions>) {
+        const options: PluginOptions = {
         columnName: 'deleted_at',
         deletedValue: new Date(),
         notDeletedValue: null,
         ...pluginOptions,
     };
-
-    type SDModelConstructor = new (...input: any[]) => Model;
-    type SDMixin<T extends SDModelConstructor> = SDModel<T> & T;
-
-    interface SDModel<T extends SDModelConstructor> {
-        options: PluginOptions;
-        isSoftDelete: boolean;
-        QueryBuilder: typeof SDQueryBuilder;
-        new(...args: any[]): SDModelInstance<T> & T;
-    }
-
-
-    interface SDModelInstance<T extends SDModelConstructor> {
-        /* MyQueryBuilder<this, this[]> would be optimal, but not possible since `this`
-         * doesn't extend Model. Not sure what this affects either.
-         */
-        // @ts-ignore
-        QueryBuilderType: SDQueryBuilder<this & InstanceType<T>, this[]>;
-    }
 
     class SDQueryBuilder<M extends Model, R = M[]> extends QueryBuilder<M, R> {
         ArrayQueryBuilderType!: SDQueryBuilder<M, M[]>;
@@ -74,7 +60,7 @@ function softDelete(pluginOptions?: Partial<PluginOptions>) {
         }
 
         // provide a way to filter to ONLY deleted records without having to remember the column name
-        whereDeleted() {
+        whereDeleted(): this {
             const modelClass = this.modelClass();
             const tableRef = this.tableRefFor(modelClass as any);
 
@@ -93,7 +79,7 @@ function softDelete(pluginOptions?: Partial<PluginOptions>) {
         }
 
         // provide a way to filter out deleted records without having to remember the column name
-        whereNotDeleted() {
+        whereNotDeleted(): this {
             const modelClass = this.modelClass();
             const tableRef = this.tableRefFor(modelClass as any);
 
@@ -105,13 +91,15 @@ function softDelete(pluginOptions?: Partial<PluginOptions>) {
         }
     }
 
-    return function <T extends SDModelConstructor>(Base: T) {
+    return function <T extends ModelConstructor>(Base: T)
+        {
+
         return class extends Base {
-            public static options = options;
             static QueryBuilder = SDQueryBuilder;
+
             QueryBuilderType!: SDQueryBuilder<this, this[]>;
 
-            static get modifiers() {
+            static get modifiers(): Modifiers<SDQueryBuilder<Model>> {
                 return {
                     notDeleted(builder: SDQueryBuilder<Model, Model[]>) {
                         builder.whereNotDeleted();
@@ -125,7 +113,7 @@ function softDelete(pluginOptions?: Partial<PluginOptions>) {
             static get isSoftDelete() {
                 return true;
             }
-        } as unknown as SDMixin<T>;
+        };
     };
 }
 
