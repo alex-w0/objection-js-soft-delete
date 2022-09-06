@@ -12,12 +12,40 @@ interface PluginOptions {
     notDeletedValue: boolean | null;
 }
 
-export type ModelConstructor<T extends Model = Model> = new (
-    ...args: any[]
-) => T;
 
-export function softDelete(pluginOptions?: Partial<PluginOptions>) {
-        const options: PluginOptions = {
+type SDModelConstructor = new (...input: any[]) => Model;
+type SDMixin<T extends SDModelConstructor> = SDModel<T> & T;
+
+interface SDModel<T extends SDModelConstructor> {
+    options: PluginOptions;
+    isSoftDelete: boolean;
+    QueryBuilder: typeof SDQueryBuilderInstance;
+    new(...args: any[]): SDModelInstance<T> & T;
+}
+
+interface SDModelInstance<T extends SDModelConstructor> {
+    /* MyQueryBuilder<this, this[]> would be optimal, but not possible since `this`
+     * doesn't extend Model. Not sure what this affects either.
+     */
+    QueryBuilderType: SDQueryBuilderInstance<any>;
+    // QueryBuilderType: SDQueryBuilderInstance<this & InstanceType<T>, this[]>;
+}
+
+abstract class SDQueryBuilderInstance<M extends Model, R = M[]> extends QueryBuilder<M, R>  {
+    ArrayQueryBuilderType!: SDQueryBuilderInstance<M, M[]>;
+    SingleQueryBuilderType!: SDQueryBuilderInstance<M, M>;
+    NumberQueryBuilderType!: SDQueryBuilderInstance<M, number>;
+    PageQueryBuilderType!: SDQueryBuilderInstance<M, Page<M>>;
+
+    abstract delete(): this['NumberQueryBuilderType'] 
+    abstract hardDelete(): void
+    abstract undelete(): this['NumberQueryBuilderType']
+    abstract whereDeleted(): this
+    abstract whereNotDeleted(): this
+}
+
+function softDelete(pluginOptions?: Partial<PluginOptions>) {
+    const options: PluginOptions = {
         columnName: 'deleted_at',
         deletedValue: new Date(),
         notDeletedValue: null,
@@ -48,7 +76,7 @@ export function softDelete(pluginOptions?: Partial<PluginOptions>) {
         }
 
         // provide a way to undo the delete
-        undelete() {
+        undelete(): this['NumberQueryBuilderType'] {
             this.context({
                 undelete: true,
             });
@@ -91,12 +119,10 @@ export function softDelete(pluginOptions?: Partial<PluginOptions>) {
         }
     }
 
-    return function <T extends ModelConstructor>(Base: T)
-        {
-
+    return function <T extends SDModelConstructor>(Base: T) {
         return class extends Base {
+            public static options = options;
             static QueryBuilder = SDQueryBuilder;
-
             QueryBuilderType!: SDQueryBuilder<this, this[]>;
 
             static get modifiers(): Modifiers<SDQueryBuilder<Model>> {
@@ -113,7 +139,7 @@ export function softDelete(pluginOptions?: Partial<PluginOptions>) {
             static get isSoftDelete() {
                 return true;
             }
-        };
+        } as unknown as SDMixin<T>;
     };
 }
 
