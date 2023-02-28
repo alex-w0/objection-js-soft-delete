@@ -650,7 +650,7 @@ describe('Soft Delete plugin tests', () => {
                 ]);
 
                 const rows = await User.query().whereExists(
-                    User.relatedQuery('animals')
+                    User.relatedQuery('animals').whereNotDeleted()
                 );
 
                 const usersWithNonDeletedAnimals = userWithAnimals.filter(
