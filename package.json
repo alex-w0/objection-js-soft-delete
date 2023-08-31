@@ -39,7 +39,7 @@
         "clean": "rm -rf dist"
     },
     "lint-staged": {
-        "*.js": "yarn run lint"
+        "*.js": "npm run lint"
     },
     "repository": {
         "type": "git",

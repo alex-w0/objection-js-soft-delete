@@ -59,7 +59,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
+                    deletedValue: () => false,
                 },
             });
 
@@ -76,8 +76,8 @@ describe('Soft Delete plugin tests', () => {
         it('when a deletedValue and a notDeletedValue is specified', async () => {
             const { User } = getModel({
                 options: {
-                    deletedValue: null,
-                    notDeletedValue: new Date(),
+                    deletedValue: () => null,
+                    notDeletedValue: () => new Date(),
                 },
             });
 
@@ -133,7 +133,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
+                    deletedValue: () => false,
                 },
             });
 
@@ -150,8 +150,8 @@ describe('Soft Delete plugin tests', () => {
         it('when a deletedValue and notDeletedValue is specified', async () => {
             const { User } = getModel({
                 options: {
-                    deletedValue: null,
-                    notDeletedValue: new Date(),
+                    deletedValue: () => null,
+                    notDeletedValue: () => new Date(),
                 },
             });
 
@@ -211,7 +211,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
+                    deletedValue: () => false,
                 },
             });
 
@@ -266,8 +266,8 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
-                    notDeletedValue: true,
+                    deletedValue: () => false,
+                    notDeletedValue: () => true,
                 },
             });
 
@@ -345,7 +345,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
+                    deletedValue: () => false,
                 },
             });
 
@@ -542,8 +542,8 @@ describe('Soft Delete plugin tests', () => {
                 const { User } = getModel({
                     options: {
                         columnName: 'active',
-                        deletedValue: false,
-                        notDeletedValue: true,
+                        deletedValue: () => false,
+                        notDeletedValue: () => true,
                     },
                 });
 
@@ -724,7 +724,7 @@ describe('Soft Delete plugin tests', () => {
             const { User } = getModel({
                 options: {
                     columnName: 'active',
-                    deletedValue: false,
+                    deletedValue: () => false,
                 },
             });
 
@@ -921,8 +921,8 @@ describe('Soft Delete plugin tests', () => {
                 const { User } = getModel({
                     options: {
                         columnName: 'active',
-                        deletedValue: false,
-                        notDeletedValue: true,
+                        deletedValue: () => false,
+                        notDeletedValue: () => true,
                     },
                 });
 

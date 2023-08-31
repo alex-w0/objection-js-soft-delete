@@ -1,8 +1,8 @@
 const softDelete = (incomingOptions) => {
     const options = {
         columnName: 'deleted_at',
-        deletedValue: new Date(),
-        notDeletedValue: null,
+        deletedValue: () => new Date(),
+        notDeletedValue: () => null,
         ...incomingOptions,
     };
 
@@ -14,7 +14,7 @@ const softDelete = (incomingOptions) => {
                     softDelete: true,
                 });
                 const patch = {};
-                patch[options.columnName] = options.deletedValue;
+                patch[options.columnName] = options.deletedValue();
                 return this.patch(patch);
             }
 
@@ -29,7 +29,7 @@ const softDelete = (incomingOptions) => {
                     undelete: true,
                 });
                 const patch = {};
-                patch[options.columnName] = options.notDeletedValue;
+                patch[options.columnName] = options.notDeletedValue();
                 return this.patch(patch);
             }
 
@@ -38,17 +38,17 @@ const softDelete = (incomingOptions) => {
                 const columnRef = this.modelClass().ref(options.columnName);
                 // this if is for backwards compatibility, to protect those that used a nullable `deleted` field
                 if (options.deletedValue === true) {
-                    return this.where(columnRef, options.deletedValue);
+                    return this.where(columnRef, options.deletedValue());
                 }
                 // qualify the column name
-                return this.whereNot(columnRef, options.notDeletedValue);
+                return this.whereNot(columnRef, options.notDeletedValue());
             }
 
             // provide a way to filter out deleted records without having to remember the column name
             whereNotDeleted() {
                 const columnRef = this.modelClass().ref(options.columnName);
                 // qualify the column name
-                return this.where(columnRef, options.notDeletedValue);
+                return this.where(columnRef, options.notDeletedValue());
             }
         }
         return class extends Model {
